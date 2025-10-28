@@ -3,49 +3,57 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-25.05-darwin";
-    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+    nix-darwin.url = "github:LnL7/nix-darwin/nix-darwin-25.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+
+    home-manager.url = "github:nix-community/home-manager/release-25.05";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nix-darwin, nixpkgs }:
-  let
-    configuration = { pkgs, ... }: {
-      # List packages installed in system profile. To search by name, run:
-      # $ nix-env -qaP | grep wget
-      environment.systemPackages =
-        [ 
-          pkgs.git
-          pkgs.zsh
-          pkgs.vim
-          pkgs.tmux
-          pkgs.fzf
-          pkgs.htop
-          pkgs.curl
-          pkgs.unzip
-        ];
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, ... }: {
 
-      # Necessary for using flakes on this system.
-      nix.settings.experimental-features = "nix-command flakes";
-
-      # Enable alternative shell support in nix-darwin.
-      # programs.fish.enable = true;
-
-      # Set Git commit hash for darwin-version.
-      system.configurationRevision = self.rev or self.dirtyRev or null;
-
-      # Used for backwards compatibility, please read the changelog before changing.
-      # $ darwin-rebuild changelog
-      system.stateVersion = 6;
-
-      # The platform the configuration will be used on.
-      nixpkgs.hostPlatform = "aarch64-darwin";
-    };
-  in
-  {
-    # Build darwin flake using:
-    # $ darwin-rebuild build --flake .#m1
     darwinConfigurations."m1" = nix-darwin.lib.darwinSystem {
-      modules = [ configuration ];
+      system = "aarch64-darwin";
+
+      modules = [
+        {
+          # Define the macOS user
+          users.users.julian = {
+            home = "/Users/julian";
+          };
+
+          # System packages
+          environment.systemPackages = with nixpkgs.legacyPackages.aarch64-darwin; [
+            git 
+            zsh
+            vim
+            tmux
+            fzf
+            htop
+            curl
+            unzip
+          ];
+
+          # Enable flakes
+          nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+          # Import Home Manager module
+          imports = [ home-manager.darwinModules.home-manager];
+
+          # Home Manager user configuration
+          home-manager.users.julian = {
+            home.homeDirectory = "/Users/julian";
+            home.stateVersion = "25.05";
+
+            imports = [ ./modules/git.nix ./modules/zsh.nix ];
+         
+          };
+
+          # Darwin metadata
+          system.stateVersion = 6;
+          system.configurationRevision = self.rev or self.dirtyRev or null;
+        }
+      ];
     };
   };
 }
