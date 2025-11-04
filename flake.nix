@@ -30,8 +30,12 @@
             tmux
             fzf
             htop
+            tree
             curl
             unzip
+            starship
+            fastfetch
+            nerd-fonts.jetbrains-mono
           ];
 
           # Enable flakes
@@ -45,7 +49,10 @@
             home.homeDirectory = "/Users/julian";
             home.stateVersion = "25.05";
 
-            imports = [ ./modules/git.nix ./modules/zsh.nix ];
+            programs.fzf.enable = true;
+            programs.fzf.enableZshIntegration = true;
+
+            imports = [./modules/starship.nix ./modules/git.nix ./modules/zsh.nix];
          
           };
 

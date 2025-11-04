@@ -23,6 +23,6 @@
   };
   # Set Zsh as default shell
   home.sessionVariables = {
-    SHELL = pkgs.zsh;
+    SHELL = "${pkgs.zsh}/bin/zsh";
   };
 }
