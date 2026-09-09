@@ -47,6 +47,10 @@ sudo nix-env --delete-generations +3 --profile /nix/var/nix/profiles/system
 nix-collect-garbage
 ```
 
+## Uninstalling
+
+See the [official Nix uninstall instructions](https://nix.dev/manual/nix/2.24/installation/uninstall#macos).
+
 ## Unsuitable to use for Linux
 
 home-manager alone is insufficient on Linux with an Nvidia GPU. Drivers require system-level management (kernel modules, FHS paths for OpenGL/CUDA/Vulkan) that home-manager can't provide. The workaround (`nixGL`) is too fragile.
